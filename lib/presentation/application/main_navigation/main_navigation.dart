@@ -1,9 +1,14 @@
+// ignore_for_file: unnecessary_null_comparison
+
 import 'package:easy_sidemenu/easy_sidemenu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:personal_finance_tracker/application/bloc/authentication/auth_bloc.dart';
+import 'package:personal_finance_tracker/application/bloc/profile/profile_bloc.dart';
 import 'package:personal_finance_tracker/application/services/operations/after_operations.dart';
 import 'package:personal_finance_tracker/core/constants/app_colors.dart';
 import 'package:personal_finance_tracker/core/extensions/loading.dart';
@@ -20,7 +25,6 @@ import 'package:personal_finance_tracker/presentation/core/are_you_sure_dialog.d
 import 'package:personal_finance_tracker/presentation/core/toast_info.dart';
 
 class MainNavigationScreen extends StatefulWidget {
-  
   const MainNavigationScreen({
     super.key,
     this.index = 0,
@@ -43,6 +47,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       if (mounted) {
         pageController.jumpToPage(index);
       }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProfileBloc>().add(const FetchProfile());
     });
     super.initState();
   }
@@ -80,36 +87,28 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         onTap: (index, _) {
           sideMenu.changePage(index);
         },
-        icon: const Icon(
-          FontAwesomeIcons.home,
-        ),
+        icon: const Icon(FontAwesomeIcons.home),
       ),
       SideMenuItem(
         title: 'Transactions',
         onTap: (index, _) {
           sideMenu.changePage(index);
         },
-        icon: const Icon(
-          FontAwesomeIcons.moneyBill,
-        ),
+        icon: const Icon(FontAwesomeIcons.moneyBill),
       ),
       SideMenuItem(
         title: 'Budgets',
         onTap: (index, _) {
           sideMenu.changePage(index);
         },
-        icon: const Icon(
-          FontAwesomeIcons.moneyCheck,
-        ),
+        icon: const Icon(FontAwesomeIcons.moneyCheck),
       ),
       SideMenuItem(
         title: 'Analytics',
         onTap: (index, _) {
           sideMenu.changePage(index);
         },
-        icon: const Icon(
-          FontAwesomeIcons.moneyBillTrendUp,
-        ),
+        icon: const Icon(FontAwesomeIcons.moneyBillTrendUp),
       ),
     ];
   }
@@ -151,73 +150,84 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             elevation: 0,
             centerTitle: true,
             actions: [
-              Row(
-                children: [
-                  Container(
-                    height: 40,
-                    width: size.width > 800 ? 155 : 120,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: AppColors.rateConColor3,
-                        width: 1,
+              BlocBuilder<ProfileBloc, ProfileState>(
+                builder: (context, state) {
+                  if (state.processingStatus == ProcessingStatus.waiting) {
+                    return const Center(
+                      child: SpinKitCircle(
+                        color: AppColors.primaryColor,
                       ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(
-                        5.0,
+                    );
+                  } else if (state.processingStatus == ProcessingStatus.error) {
+                    return Center(
+                      child: Text(
+                        'Oops! ${state.error.errorMsg}',
+                        style: getRegularStyle(color: AppColors.greyText),
                       ),
-                      child: Center(
-                        child: Text(
-                          'August 3rd, 2024 - 08:32pm',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: getLightStyle(
-                            color: Colors.black,
-                            fontSize: 11,
+                    );
+                  } else if (state.profileDetails == null) {
+                    return Center(
+                      child: Text(
+                        'No profile data available.',
+                        style: getRegularStyle(color: AppColors.greyText),
+                      ),
+                    );
+                  }
+
+                  final profiles = state.profileDetails;
+                  // Format the current date for display
+                  final currentDate = DateFormat('MMMM d, yyyy - h:mm a').format(DateTime.now());
+                  return Row(
+                    children: [
+                      Container(
+                        height: 40,
+                        width: size.width > 800 ? 155 : 120,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: AppColors.rateConColor3,
+                            width: 1,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: Center(
+                            child: Text(
+                              currentDate,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: getLightStyle(
+                                color: Colors.black,
+                                fontSize: 11,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 15,
-                  ),
-                  MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    child: GestureDetector(
-                      onTap: () {
-                        sideMenu.changePage(19);
-                      },
-                      child: Row(
-                        children: [
-                          Image.asset(
-                            Assets.images.profile.path,
+                      const SizedBox(width: 15),
+                      MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
+                          onTap: () {
+                            sideMenu.changePage(19);
+                          },
+                          child: Row(
+                            children: [
+                              Image.asset(Assets.images.profile.path),
+                              const SizedBox(width: 15),
+                              Text(
+                                'Hello ${profiles['full_name'] ?? 'N/A'}',
+                                style: getRegularStyle(color: Colors.black),
+                              ),
+                            ],
                           ),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          Text(
-                            'Hello Jane',
-                            style: getRegularStyle(
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 15,
-                  ),
-                  SvgPicture.asset(
-                    Assets.icons.notification,
-                  ),
-                  const SizedBox(
-                    width: 18,
-                  ),
-                ],
-              )
+                      const SizedBox(width: 18),
+                    ],
+                  );
+                },
+              ),
             ],
             leadingWidth: 200,
             leading: Row(
@@ -232,12 +242,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     size: 20,
                   ),
                 ),
-                const SizedBox(
-                  width: 20,
-                ),
-                Image.asset(
-                  Assets.images.finLogo.path,
-                ),
+                const SizedBox(width: 20),
+                Image.asset(Assets.images.finLogo.path),
               ],
             ),
           ),
@@ -249,17 +255,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               child: LayoutBuilder(builder: (context, constraint) {
                 return SingleChildScrollView(
                   child: ConstrainedBox(
-                    constraints:
-                        BoxConstraints(minHeight: constraint.maxHeight),
+                    constraints: BoxConstraints(minHeight: constraint.maxHeight),
                     child: IntrinsicHeight(
                       child: Container(
                         color: AppColors.rateConColor3,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(
-                              height: 10,
-                            ),
+                            const SizedBox(height: 10),
                             SizedBox(
                               height: size.height / 1.3,
                               child: Row(
@@ -274,26 +277,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                                           ? SideMenuDisplayMode.open
                                           : SideMenuDisplayMode.compact,
                                       showHamburger: false,
-                                      arrowOpen: AppColors.primaryColor
-                                          .withOpacity(0.3),
-                                      arrowCollapse: AppColors.primaryColor
-                                          .withOpacity(0.3),
+                                      arrowOpen: AppColors.primaryColor.withOpacity(0.3),
+                                      arrowCollapse: AppColors.primaryColor.withOpacity(0.3),
                                       hoverColor: Colors.grey.withOpacity(0.1),
-                                      selectedIconColorExpandable:
-                                          AppColors.vistaYellow,
-                                      unselectedIconColorExpandable:
-                                          AppColors.greyText,
-                                      selectedTitleTextStyleExpandable:
-                                          getRegularStyle(
-                                        color: AppColors.vistaYellow,
-                                      ),
+                                      selectedIconColorExpandable: AppColors.vistaYellow,
+                                      unselectedIconColorExpandable: AppColors.greyText,
+                                      selectedTitleTextStyleExpandable: getRegularStyle(color: AppColors.vistaYellow),
                                       selectedColor: AppColors.vistaYellow,
-                                      selectedTitleTextStyle: getMediumStyle(
-                                        color: Colors.white,
-                                      ),
-                                      unselectedTitleTextStyle: getLightStyle(
-                                        color: AppColors.greyText,
-                                      ),
+                                      selectedTitleTextStyle: getMediumStyle(color: Colors.white),
+                                      unselectedTitleTextStyle: getLightStyle(color: AppColors.greyText),
                                       selectedIconColor: Colors.white,
                                       iconSize: 18,
                                       unselectedIconColor: AppColors.greyText,
@@ -316,28 +308,23 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                                     child: GestureDetector(
                                       onTap: () => logoutDialog(),
                                       child: Wrap(
-                                        crossAxisAlignment:
-                                            WrapCrossAlignment.center,
+                                        crossAxisAlignment: WrapCrossAlignment.center,
                                         spacing: 8,
                                         children: [
                                           Text(
                                             'Log out',
-                                            style: getRegularStyle(
-                                              color: AppColors.greyText,
-                                            ),
+                                            style: getRegularStyle(color: AppColors.greyText),
                                           ),
                                           const Icon(
                                             Icons.logout,
                                             color: AppColors.greyText,
                                             size: 20,
-                                          )
+                                          ),
                                         ],
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(
-                                    height: 50,
-                                  ),
+                                  const SizedBox(height: 50),
                                 ],
                               ),
                             ),
@@ -351,9 +338,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             ),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top,
-                ),
+                padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
                 child: PageView(
                   controller: pageController,
                   children: const [
@@ -362,13 +347,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     BudgetScreen(),
                     AnalyticsScreen(),
                     ProfileScreen(),
-                    // UserProfileScreen(
-                    //   sideMenu: sideMenu,
-                    // ),
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

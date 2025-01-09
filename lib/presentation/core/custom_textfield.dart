@@ -26,7 +26,7 @@ class CustomTextfield extends StatelessWidget {
     return TextFormField(
       autovalidateMode: AutovalidateMode.onUserInteraction,
       controller: textController,
-      inputFormatters: [],
+      inputFormatters: const [],
       decoration: InputDecoration(
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSize.s4),

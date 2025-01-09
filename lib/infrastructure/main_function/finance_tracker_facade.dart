@@ -342,7 +342,6 @@ class FinanceTrackerFacade extends IFinanceTrackerFacade {
 
   @override
   Stream<List<Map<String, dynamic>>> fetchBudgetStatusOverTime() async* {
-    String userId = firebaseAuth.currentUser!.uid;
 
     Stream<List<Map<String, dynamic>>> budgetsStream = fetchBudgets();
     Stream<List<Map<String, dynamic>>> transactionsStream = fetchTransactions();

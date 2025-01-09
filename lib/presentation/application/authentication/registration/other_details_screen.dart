@@ -8,13 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:nigerian_states_and_lga/nigerian_states_and_lga.dart';
 import 'package:personal_finance_tracker/application/bloc/complete_registration/complete_reg_bloc.dart';
 import 'package:personal_finance_tracker/application/routes/app_routes_config.dart';
 import 'package:personal_finance_tracker/core/constants/app_colors.dart';
 import 'package:personal_finance_tracker/core/extensions/loading.dart';
-import 'package:personal_finance_tracker/core/image_picker_helper.dart';
 import 'package:personal_finance_tracker/core/shared/enums/processing_status.dart';
 import 'package:personal_finance_tracker/core/shared/enums/status.dart';
 import 'package:personal_finance_tracker/core/theme/font_manager.dart';
@@ -25,7 +23,6 @@ import 'package:personal_finance_tracker/presentation/application/authentication
 import 'package:personal_finance_tracker/presentation/application/authentication/widget/auth_button.dart';
 import 'package:personal_finance_tracker/presentation/application/authentication/widget/auth_textfield.dart';
 import 'package:personal_finance_tracker/presentation/core/toast_info.dart';
-import 'dart:html' as html;
 
 class RegistrationCompleteDetails extends StatefulWidget {
   const RegistrationCompleteDetails({super.key});

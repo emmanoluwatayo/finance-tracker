@@ -6,7 +6,7 @@ extension XFileExtension on XFile {
   Future<File> toFile() async {
     final bytes = await readAsBytes();
     final tempDir = await getTemporaryDirectory();
-    final tempFile = File('${tempDir.path}/${this.name}');
+    final tempFile = File('${tempDir.path}/$name');
     await tempFile.writeAsBytes(bytes);
     return tempFile;
   }
